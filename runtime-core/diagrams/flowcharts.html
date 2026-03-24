@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>Vue3 Runtime-Core 流程图</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      min-height: 100vh;
+      padding: 20px;
+      color: #fff;
+    }
+    h1 { text-align: center; color: #42b883; margin-bottom: 30px; }
+    .section { background: rgba(255,255,255,0.95); border-radius: 16px; padding: 20px; margin: 20px auto; max-width: 1200px; }
+    .section h2 { color: #333; border-bottom: 3px solid #42b883; padding-bottom: 10px; margin-bottom: 15px; }
+  </style>
+</head>
+<body>
+  <h1>Vue3 Runtime-Core 流程图</h1>
+  
+  <div class="section">
+    <h2>1. 组件创建流程</h2>
+    <div class="mermaid">
+      flowchart LR
+        A[createApp] --> B[createAppContext]
+        B --> C[app.mount]
+        C --> D[createRenderer.createApp]
+        D --> E[mount]
+        E --> F[createComponentInstance]
+        F --> G[setupStatefulComponent]
+        G --> H[handleSetupResult]
+        H --> I[setupRenderEffect]
+        I --> J[componentUpdateFn]
+        J --> K[renderComponentRoot]
+        K --> L[processComponent]
+        L --> M[mountElement]
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>2. 组件更新流程</h2>
+    <div class="mermaid">
+      flowchart LR
+        A[数据变化] --> B[trigger effect]
+        B --> C[queueJob]
+        C --> D[flushJobs]
+        D --> E[componentUpdateFn]
+        E --> F[renderComponentRoot]
+        F --> G[patch]
+        G --> H[patchElement]
+        G --> I[patchChildren]
+        G --> J[patchProps]
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>3. 调度器流程</h2>
+    <div class="mermaid">
+      flowchart LR
+        A[queueJob] --> B{已在队列?}
+        B -->|是| C[去重返回]
+        B -->|否| D[二分查找插入]
+        D --> E[queueFlush]
+        E --> F[Promise.resolve.then]
+        F --> G[flushJobs]
+        G --> H[按id顺序执行]
+        H --> I[checkRecursiveUpdates]
+        I --> J[递归<100?]
+        J -->|是| K[执行任务]
+        J -->|否| L[抛出错误]
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>4. VNode 类型</h2>
+    <div class="mermaid">
+      flowchart TB
+        A[VNodeTypes] --> B[string]
+        A --> C[VNode]
+        A --> D[Component]
+        A --> E[Fragment]
+        A --> F[Text]
+        A --> G[Comment]
+        A --> H[Static]
+    </div>
+  </div>
+
+  <script>
+    mermaid.initialize({ startOnLoad: true, theme: 'default' });
+  </script>
+</body>
+</html>
