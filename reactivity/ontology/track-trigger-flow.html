@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>Track/Trigger 流程图</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      min-height: 100vh;
+      padding: 20px;
+      color: #fff;
+    }
+    h1 { text-align: center; color: #42b883; margin-bottom: 30px; }
+    .flow-chart {
+      background: rgba(255,255,255,0.95);
+      border-radius: 16px;
+      padding: 30px;
+      margin: 0 auto;
+      max-width: 1200px;
+    }
+    .section { margin-bottom: 40px; }
+    .section h2 { color: #333; border-bottom: 3px solid #42b883; padding-bottom: 10px; margin-bottom: 20px; }
+  </style>
+</head>
+<body>
+  <h1>Vue3 Track/Trigger 机制流程图</h1>
+  <div class="flow-chart">
+    <div class="section">
+      <h2>Track（依赖收集）流程</h2>
+      <div class="mermaid">
+        flowchart LR
+          A[读取响应式属性] --> B[触发 getter]
+          B --> C{判断是否应该收集}
+          C -->|是| D[track target, key]
+          C -->|否| E[直接返回]
+          D --> F[查找/创建 Dep]
+          F --> G[trackEffects dep]
+          G --> H[dep.add activeEffect]
+          H --> I[effect.deps.push dep]
+          I --> J[返回属性值]
+          E --> J
+          style A fill:#42b883,color:#fff
+          style D fill:#d69e2e,color:#fff
+          style F fill:#3182ce,color:#fff
+          style H fill:#805ad5,color:#fff
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Trigger（触发更新）流程</h2>
+      <div class="mermaid">
+        flowchart LR
+          A[属性赋值] --> B[触发 setter]
+          B --> C[trigger target, key, newVal, oldVal]
+          C --> D[查找 Dep]
+          D --> E{Dep 存在?}
+          E -->|否| F[直接返回]
+          E -->|是| G[合并相关 Dep]
+          G --> H[ITERATE_KEY 数组length]
+          H --> I[triggerEffects 合并后的Dep]
+          I --> J{区分 effect 类型}
+          J -->|computed| K[先执行 computed]
+          J -->|普通 effect| L[执行普通 effect]
+          K --> M[标记 dirty 为 false]
+          L --> N[执行 effect 函数]
+          M --> O[完成]
+          N --> O
+          style A fill:#e53e3e,color:#fff
+          style C fill:#d69e2e,color:#fff
+          style I fill:#805ad5,color:#fff
+          style K fill:#38a169,color:#fff
+          style L fill:#3182ce,color:#fff
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Dep 与 Effect 关系</h2>
+      <div class="mermaid">
+        flowchart TB
+          TM[targetMap WeakMap] --> D[Dep 依赖管理器]
+          D -->|subs| L[Link 双向链表]
+          E[Effect 副作用函数] -->|deps| L
+          L -.->|next| L
+          L -.->|prev| L
+          style TM fill:#718096,color:#fff
+          style D fill:#3182ce,color:#fff
+          style E fill:#42b883,color:#fff
+          style L fill:#805ad5,color:#fff
+      </div>
+    </div>
+  </div>
+
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'default',
+      flowchart: { useMaxWidth: true, htmlLabels: true, curve: 'basis' }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,326 @@
+{
+  "graph": {
+    "nodes": [
+      {
+        "id": "ref",
+        "type": "ReactivityPrimitive",
+        "label": "Ref",
+        "properties": {
+          "description": "响应式引用，包装单个值的容器",
+          "implementation": "RefImpl",
+          "category": "core"
+        }
+      },
+      {
+        "id": "refimpl",
+        "type": "ImplementationClass",
+        "label": "RefImpl",
+        "properties": {
+          "description": "Ref 的具体实现类",
+          "category": "internal"
+        }
+      },
+      {
+        "id": "reactive",
+        "type": "ReactivityPrimitive",
+        "label": "Reactive",
+        "properties": {
+          "description": "创建对象的深层响应式代理",
+          "implementation": "Proxy",
+          "category": "core"
+        }
+      },
+      {
+        "id": "proxy",
+        "type": "ProxyHandler",
+        "label": "Proxy",
+        "properties": {
+          "description": "JS Proxy 对象，拦截属性访问",
+          "category": "internal"
+        }
+      },
+      {
+        "id": "effect",
+        "type": "ReactivityPrimitive",
+        "label": "Effect",
+        "properties": {
+          "description": "副作用函数，响应数据变化自动执行",
+          "category": "core"
+        }
+      },
+      {
+        "id": "dep",
+        "type": "InternalClass",
+        "label": "Dep",
+        "properties": {
+          "description": "依赖管理器，管理订阅当前数据的 effects",
+          "category": "internal"
+        }
+      },
+      {
+        "id": "link",
+        "type": "InternalClass",
+        "label": "Link",
+        "properties": {
+          "description": "连接 Dep 和 Effect 的双向链表节点",
+          "category": "internal"
+        }
+      },
+      {
+        "id": "track",
+        "type": "Operation",
+        "label": "track",
+        "properties": {
+          "description": "追踪依赖 - 在 getter 中收集当前 effect",
+          "category": "operation"
+        }
+      },
+      {
+        "id": "trigger",
+        "type": "Operation",
+        "label": "trigger",
+        "properties": {
+          "description": "触发更新 - 在 setter 中通知所有订阅的 effects",
+          "category": "operation"
+        }
+      },
+      {
+        "id": "computed",
+        "type": "ReactivityPrimitive",
+        "label": "Computed",
+        "properties": {
+          "description": "计算属性，基于依赖缓存的派生值",
+          "category": "core"
+        }
+      },
+      {
+        "id": "collectionhandlers",
+        "type": "HandlerSet",
+        "label": "CollectionHandlers",
+        "properties": {
+          "description": "处理 Map/Set/WeakMap/WeakSet 的 Proxy handlers",
+          "targets": ["Map", "Set", "WeakMap", "WeakSet"],
+          "category": "specialized"
+        }
+      },
+      {
+        "id": "arrayinstrumentations",
+        "type": "HandlerSet",
+        "label": "ArrayInstrumentations",
+        "properties": {
+          "description": "数组方法的特殊处理（如 includes, indexOf 等）",
+          "category": "specialized"
+        }
+      },
+      {
+        "id": "globalversion",
+        "type": "InternalState",
+        "label": "GlobalVersion",
+        "properties": {
+          "description": "全局版本计数器，用于 dirty-check 优化",
+          "category": "optimization"
+        }
+      },
+      {
+        "id": "effectscope",
+        "type": "ReactivityPrimitive",
+        "label": "EffectScope",
+        "properties": {
+          "description": "effect 作用域，批量收集和清理 effects",
+          "category": "core"
+        }
+      }
+    ],
+    "edges": [
+      {
+        "id": "e1",
+        "from": "ref",
+        "to": "refimpl",
+        "type": "implements",
+        "properties": { "description": "Ref 由 RefImpl 实现" }
+      },
+      {
+        "id": "e2",
+        "from": "refimpl",
+        "to": "track",
+        "type": "calls",
+        "properties": { "description": "getter 时调用 track" }
+      },
+      {
+        "id": "e3",
+        "from": "refimpl",
+        "to": "trigger",
+        "type": "calls",
+        "properties": { "description": "setter 时调用 trigger" }
+      },
+      {
+        "id": "e4",
+        "from": "reactive",
+        "to": "proxy",
+        "type": "extends",
+        "properties": { "description": "reactive 使用 Proxy 实现" }
+      },
+      {
+        "id": "e5",
+        "from": "proxy",
+        "to": "track",
+        "type": "calls",
+        "properties": { "description": "Proxy get handler 调用 track" }
+      },
+      {
+        "id": "e6",
+        "from": "proxy",
+        "to": "trigger",
+        "type": "calls",
+        "properties": { "description": "Proxy set handler 调用 trigger" }
+      },
+      {
+        "id": "e7",
+        "from": "track",
+        "to": "dep",
+        "type": "operates_on",
+        "properties": { "description": "track 操作 Dep 收集依赖" }
+      },
+      {
+        "id": "e8",
+        "from": "trigger",
+        "to": "dep",
+        "type": "operates_on",
+        "properties": { "description": "trigger 操作 Dep 触发更新" }
+      },
+      {
+        "id": "e9",
+        "from": "dep",
+        "to": "link",
+        "type": "contains",
+        "properties": { "description": "Dep 维护 Link 链表" }
+      },
+      {
+        "id": "e10",
+        "from": "effect",
+        "to": "link",
+        "type": "contains",
+        "properties": { "description": "Effect 维护 Link 链表" }
+      },
+      {
+        "id": "e11",
+        "from": "effect",
+        "to": "track",
+        "type": "invokes",
+        "properties": { "description": "Effect 执行时触发 track" }
+      },
+      {
+        "id": "e12",
+        "from": "computed",
+        "to": "ref",
+        "type": "implements",
+        "properties": { "description": "Computed 内部使用 Ref 存储值" }
+      },
+      {
+        "id": "e13",
+        "from": "computed",
+        "to": "effect",
+        "type": "uses",
+        "properties": { "description": "Computed 使用 effect 追踪依赖" }
+      },
+      {
+        "id": "e14",
+        "from": "computed",
+        "to": "track",
+        "type": "calls",
+        "properties": { "description": "访问 computed 值时调用 track" }
+      },
+      {
+        "id": "e15",
+        "from": "computed",
+        "to": "trigger",
+        "type": "calls",
+        "properties": { "description": "依赖变化时调用 trigger 更新" }
+      },
+      {
+        "id": "e16",
+        "from": "reactive",
+        "to": "collectionhandlers",
+        "type": "uses_for",
+        "properties": { "description": "处理集合类型时使用" }
+      },
+      {
+        "id": "e17",
+        "from": "reactive",
+        "to": "arrayinstrumentations",
+        "type": "uses_for",
+        "properties": { "description": "处理数组方法时使用" }
+      },
+      {
+        "id": "e18",
+        "from": "arrayinstrumentations",
+        "to": "track",
+        "type": "calls",
+        "properties": { "description": "数组方法拦截时调用 track" }
+      },
+      {
+        "id": "e19",
+        "from": "effectscope",
+        "to": "effect",
+        "type": "manages",
+        "properties": { "description": "EffectScope 管理多个 Effect" }
+      },
+      {
+        "id": "e20",
+        "from": "globalversion",
+        "to": "dep",
+        "type": "optimizes",
+        "properties": { "description": "GlobalVersion 优化 Dep 的 dirty-check" }
+      },
+      {
+        "id": "e21",
+        "from": "effectscope",
+        "to": "track",
+        "type": "calls",
+        "properties": { "description": "scope.run 中调用 track" }
+      },
+      {
+        "id": "e22",
+        "from": "effectscope",
+        "to": "trigger",
+        "type": "calls",
+        "properties": { "description": "scope 停止时可能触发清理" }
+      },
+      {
+        "id": "e23",
+        "from": "collectionhandlers",
+        "to": "track",
+        "type": "calls",
+        "properties": { "description": "集合操作拦截时调用 track" }
+      },
+      {
+        "id": "e24",
+        "from": "collectionhandlers",
+        "to": "trigger",
+        "type": "calls",
+        "properties": { "description": "集合修改时调用 trigger" }
+      },
+      {
+        "id": "e25",
+        "from": "link",
+        "to": "dep",
+        "type": "references",
+        "properties": { "description": "Link 引用 Dep" }
+      },
+      {
+        "id": "e26",
+        "from": "link",
+        "to": "effect",
+        "type": "references",
+        "properties": { "description": "Link 引用 Effect" }
+      }
+    ]
+  },
+  "metadata": {
+    "title": "Vue3 Reactivity 模块知识图谱",
+    "version": "3.x",
+    "created": "2026-03-23",
+    "entityCount": 14,
+    "relationCount": 26
+  }
+}

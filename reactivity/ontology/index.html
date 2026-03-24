@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vue3 Reactivity 知识图谱</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      min-height: 100vh;
+      color: #fff;
+    }
+    
+    .header {
+      text-align: center;
+      padding: 20px;
+      background: rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(10px);
+    }
+    
+    .header h1 {
+      font-size: 28px;
+      background: linear-gradient(90deg, #42b883, #35495e);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 8px;
+    }
+    
+    .header p {
+      color: #8b9dc3;
+      font-size: 14px;
+    }
+    
+    .stats {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      margin-top: 10px;
+    }
+    
+    .stat {
+      text-align: center;
+    }
+    
+    .stat-value {
+      font-size: 24px;
+      font-weight: bold;
+      color: #42b883;
+    }
+    
+    .stat-label {
+      font-size: 12px;
+      color: #8b9dc3;
+    }
+    
+    #graph-container {
+      width: 100%;
+      height: calc(100vh - 140px);
+      position: relative;
+    }
+    
+    svg {
+      width: 100%;
+      height: 100%;
+    }
+    
+    .node {
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .node:hover {
+      filter: brightness(1.2);
+    }
+    
+    .node-circle {
+      stroke: #fff;
+      stroke-width: 2px;
+    }
+    
+    .node-label {
+      font-size: 12px;
+      font-weight: 600;
+      fill: #fff;
+      text-anchor: middle;
+      pointer-events: none;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+    }
+    
+    .node-type {
+      font-size: 10px;
+      fill: #8b9dc3;
+      text-anchor: middle;
+      pointer-events: none;
+    }
+    
+    .link {
+      stroke-opacity: 0.6;
+      stroke-width: 1.5px;
+      transition: all 0.3s ease;
+    }
+    
+    .link:hover {
+      stroke-opacity: 1;
+      stroke-width: 2.5px;
+    }
+    
+    .link-label {
+      font-size: 9px;
+      fill: #a0aec0;
+      text-anchor: middle;
+      pointer-events: none;
+      background: rgba(0,0,0,0.7);
+    }
+    
+    .link-label-bg {
+      fill: rgba(26, 26, 46, 0.9);
+    }
+    
+    .tooltip {
+      position: absolute;
+      background: rgba(0, 0, 0, 0.9);
+      border: 1px solid #42b883;
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 13px;
+      max-width: 280px;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.2s;
+      z-index: 1000;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    }
+    
+    .tooltip.show {
+      opacity: 1;
+    }
+    
+    .tooltip h3 {
+      color: #42b883;
+      margin-bottom: 6px;
+      font-size: 14px;
+    }
+    
+    .tooltip p {
+      color: #cbd5e0;
+      line-height: 1.5;
+    }
+    
+    .tooltip .type {
+      color: #8b9dc3;
+      font-size: 11px;
+      margin-top: 4px;
+    }
+    
+    .legend {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(10px);
+      padding: 15px;
+      border-radius: 10px;
+      border: 1px solid rgba(66, 184, 131, 0.3);
+    }
+    
+    .legend h4 {
+      color: #42b883;
+      margin-bottom: 10px;
+      font-size: 13px;
+    }
+    
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 6px;
+      font-size: 12px;
+      color: #cbd5e0;
+    }
+    
+    .legend-color {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      border: 2px solid #fff;
+    }
+    
+    .controls {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      display: flex;
+      gap: 8px;
+    }
+    
+    .btn {
+      background: rgba(66, 184, 131, 0.2);
+      border: 1px solid #42b883;
+      color: #42b883;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+      transition: all 0.2s;
+    }
+    
+    .btn:hover {
+      background: rgba(66, 184, 131, 0.4);
+    }
+    
+    .btn.active {
+      background: #42b883;
+      color: #1a1a2e;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>🎯 Vue3 Reactivity 模块知识图谱</h1>
+    <p>基于 Vue3 响应式系统核心实体与关系构建</p>
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-value">14</div>
+        <div class="stat-label">实体</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value">26</div>
+        <div class="stat-label">关系</div>
+      </div>
+    </div>
+  </div>
+  
+  <div id="graph-container">
+    <svg id="graph"></svg>
+    <div class="tooltip" id="tooltip"></div>
+    <div class="legend">
+      <h4>实体类型</h4>
+      <div class="legend-item"><div class="legend-color" style="background: #42b883;"></div>ReactivityPrimitive (核心API)</div>
+      <div class="legend-item"><div class="legend-color" style="background: #e53e3e;"></div>ImplementationClass (实现类)</div>
+      <div class="legend-item"><div class="legend-color" style="background: #3182ce;"></div>InternalClass (内部类)</div>
+      <div class="legend-item"><div class="legend-color" style="background: #d69e2e;"></div>Operation (操作)</div>
+      <div class="legend-item"><div class="legend-color" style="background: #805ad5;"></div>HandlerSet (处理器集合)</div>
+      <div class="legend-item"><div class="legend-color" style="background: #38a169;"></div>InternalState (内部状态)</div>
+      <div class="legend-item"><div class="legend-color" style="background: #718096;"></div>ProxyHandler (代理处理器)</div>
+    </div>
+    <div class="controls">
+      <button class="btn" onclick="resetZoom()">重置视图</button>
+      <button class="btn" onclick="toggleAnimation()" id="animBtn">暂停动画</button>
+    </div>
+  </div>
+
+  <script>
+    // Graph data
+    const graphData = {
+      nodes: [
+        { id: "ref", type: "ReactivityPrimitive", label: "Ref", description: "响应式引用，包装单个值的容器", implementation: "RefImpl", category: "core" },
+        { id: "refimpl", type: "ImplementationClass", label: "RefImpl", description: "Ref 的具体实现类", category: "internal" },
+        { id: "reactive", type: "ReactivityPrimitive", label: "Reactive", description: "创建对象的深层响应式代理", implementation: "Proxy", category: "core" },
+        { id: "proxy", type: "ProxyHandler", label: "Proxy", description: "JS Proxy 对象，拦截属性访问", category: "internal" },
+        { id: "effect", type: "ReactivityPrimitive", label: "Effect", description: "副作用函数，响应数据变化自动执行", category: "core" },
+        { id: "dep", type: "InternalClass", label: "Dep", description: "依赖管理器，管理订阅当前数据的 effects", category: "internal" },
+        { id: "link", type: "InternalClass", label: "Link", description: "连接 Dep 和 Effect 的双向链表节点", category: "internal" },
+        { id: "track", type: "Operation", label: "track", description: "追踪依赖 - 在 getter 中收集当前 effect", category: "operation" },
+        { id: "trigger", type: "Operation", label: "trigger", description: "触发更新 - 在 setter 中通知所有订阅的 effects", category: "operation" },
+        { id: "computed", type: "ReactivityPrimitive", label: "Computed", description: "计算属性，基于依赖缓存的派生值", category: "core" },
+        { id: "collectionhandlers", type: "HandlerSet", label: "CollectionHandlers", description: "处理 Map/Set/WeakMap/WeakSet 的 Proxy handlers", targets: ["Map", "Set", "WeakMap", "WeakSet"], category: "specialized" },
+        { id: "arrayinstrumentations", type: "HandlerSet", label: "ArrayInstrumentations", description: "数组方法的特殊处理（如 includes, indexOf 等）", category: "specialized" },
+        { id: "globalversion", type: "InternalState", label: "GlobalVersion", description: "全局版本计数器，用于 dirty-check 优化", category: "optimization" },
+        { id: "effectscope", type: "ReactivityPrimitive", label: "EffectScope", description: "effect 作用域，批量收集和清理 effects", category: "core" }
+      ],
+      edges: [
+        { id: "e1", from: "ref", to: "refimpl", type: "implements", description: "Ref 由 RefImpl 实现" },
+        { id: "e2", from: "refimpl", to: "track", type: "calls", description: "getter 时调用 track" },
+        { id: "e3", from: "refimpl", to: "trigger", type: "calls", description: "setter 时调用 trigger" },
+        { id: "e4", from: "reactive", to: "proxy", type: "extends", description: "reactive 使用 Proxy 实现" },
+        { id: "e5", from: "proxy", to: "track", type: "calls", description: "Proxy get handler 调用 track" },
+        { id: "e6", from: "proxy", to: "trigger", type: "calls", description: "Proxy set handler 调用 trigger" },
+        { id: "e7", from: "track", to: "dep", type: "operates_on", description: "track 操作 Dep 收集依赖" },
+        { id: "e8", from: "trigger", to: "dep", type: "operates_on", description: "trigger 操作 Dep 触发更新" },
+        { id: "e9", from: "dep", to: "link", type: "contains", description: "Dep 维护 Link 链表" },
+        { id: "e10", from: "effect", to: "link", type: "contains", description: "Effect 维护 Link 链表" },
+        { id: "e11", from: "effect", to: "track", type: "invokes", description: "Effect 执行时触发 track" },
+        { id: "e12", from: "computed", to: "ref", type: "implements", description: "Computed 内部使用 Ref 存储值" },
+        { id: "e13", from: "computed", to: "effect", type: "uses", description: "Computed 使用 effect 追踪依赖" },
+        { id: "e14", from: "computed", to: "track", type: "calls", description: "访问 computed 值时调用 track" },
+        { id: "e15", from: "computed", to: "trigger", type: "calls", description: "依赖变化时调用 trigger 更新" },
+        { id: "e16", from: "reactive", to: "collectionhandlers", type: "uses_for", description: "处理集合类型时使用" },
+        { id: "e17", from: "reactive", to: "arrayinstrumentations", type: "uses_for", description: "处理数组方法时使用" },
+        { id: "e18", from: "arrayinstrumentations", to: "track", type: "calls", description: "数组方法拦截时调用 track" },
+        { id: "e19", from: "effectscope", to: "effect", type: "manages", description: "EffectScope 管理多个 Effect" },
+        { id: "e20", from: "globalversion", to: "dep", type: "optimizes", description: "GlobalVersion 优化 Dep 的 dirty-check" },
+        { id: "e21", from: "effectscope", to: "track", type: "calls", description: "scope.run 中调用 track" },
+        { id: "e22", from: "effectscope", to: "trigger", type: "calls", description: "scope 停止时可能触发清理" },
+        { id: "e23", from: "collectionhandlers", to: "track", type: "calls", description: "集合操作拦截时调用 track" },
+        { id: "e24", from: "collectionhandlers", to: "trigger", type: "calls", description: "集合修改时调用 trigger" },
+        { id: "e25", from: "link", to: "dep", type: "references", description: "Link 引用 Dep" },
+        { id: "e26", from: "link", to: "effect", type: "references", description: "Link 引用 Effect" }
+      ]
+    };
+
+    // Color mapping
+    const colorMap = {
+      "ReactivityPrimitive": "#42b883",
+      "ImplementationClass": "#e53e3e",
+      "InternalClass": "#3182ce",
+      "Operation": "#d69e2e",
+      "HandlerSet": "#805ad5",
+      "InternalState": "#38a169",
+      "ProxyHandler": "#718096"
+    };
+
+    // Edge color mapping
+    const edgeColorMap = {
+      "implements": "#42b883",
+      "calls": "#d69e2e",
+      "extends": "#3182ce",
+      "operates_on": "#e53e3e",
+      "contains": "#805ad5",
+      "invokes": "#d69e2e",
+      "uses": "#38a169",
+      "uses_for": "#718096",
+      "manages": "#ed64a6",
+      "optimizes": "#38a169",
+      "references": "#a0aec0"
+    };
+
+    // Setup SVG - use fixed fallback dimensions
+    const container = document.getElementById('graph-container');
+    let width = container.clientWidth || 1200;
+    let height = container.clientHeight || 600;
+    
+    const svg = d3.select("#graph")
+      .attr("viewBox", [0, 0, width, height]);
+    
+    // Add zoom behavior
+    const g = svg.append("g");
+    
+    const zoom = d3.zoom()
+      .scaleExtent([0.1, 4])
+      .on("zoom", (event) => {
+        g.attr("transform", event.transform);
+      });
+    
+    svg.call(zoom);
+    
+    // Create force simulation
+    // Convert edge from/to to source/target for D3
+    graphData.edges.forEach(edge => {
+      edge.source = edge.from;
+      edge.target = edge.to;
+    });
+    
+    const simulation = d3.forceSimulation(graphData.nodes)
+      .force("link", d3.forceLink(graphData.edges).id(d => d.id).distance(120))
+      .force("charge", d3.forceManyBody().strength(-500))
+      .force("center", d3.forceCenter(width / 2, height / 2))
+      .force("collision", d3.forceCollide().radius(50));
+    
+    // Create links
+    const link = g.append("g")
+      .attr("class", "links")
+      .selectAll("line")
+      .data(graphData.edges)
+      .join("line")
+      .attr("class", "link")
+      .attr("stroke", d => edgeColorMap[d.type] || "#999")
+      .attr("marker-end", d => `url(#arrow-${d.type})`);
+    
+    // Create link labels
+    const linkLabelGroup = g.append("g")
+      .attr("class", "link-labels");
+    
+    const linkLabelBg = linkLabelGroup.selectAll("rect")
+      .data(graphData.edges)
+      .join("rect")
+      .attr("class", "link-label-bg")
+      .attr("rx", 4)
+      .attr("ry", 4);
+    
+    const linkLabel = linkLabelGroup.selectAll("text")
+      .data(graphData.edges)
+      .join("text")
+      .attr("class", "link-label")
+      .text(d => d.type)
+      .attr("dy", "0.35em");
+    
+    // Create nodes
+    const node = g.append("g")
+      .attr("class", "nodes")
+      .selectAll("g")
+      .data(graphData.nodes)
+      .join("g")
+      .attr("class", "node")
+      .call(d3.drag()
+        .on("start", dragstarted)
+        .on("drag", dragged)
+        .on("end", dragended));
+    
+    // Node circles
+    node.append("circle")
+      .attr("class", "node-circle")
+      .attr("r", d => d.category === "core" ? 28 : 22)
+      .attr("fill", d => colorMap[d.type] || "#999")
+      .attr("stroke-width", d => d.category === "core" ? 3 : 2);
+    
+    // Node labels
+    node.append("text")
+      .attr("class", "node-label")
+      .attr("dy", d => d.category === "core" ? 5 : 4)
+      .text(d => d.label)
+      .style("font-size", d => d.category === "core" ? "14px" : "12px");
+    
+    // Node type labels
+    node.append("text")
+      .attr("class", "node-type")
+      .attr("dy", d => d.category === "core" ? 42 : 36)
+      .text(d => d.type.replace(/([A-Z])/g, ' $1').trim());
+    
+    // Tooltip
+    const tooltip = document.getElementById('tooltip');
+    
+    node.on("mouseover", (event, d) => {
+      tooltip.innerHTML = `
+        <h3>${d.label}</h3>
+        <p>${d.description}</p>
+        <div class="type">类型: ${d.type}</div>
+        ${d.implementation ? `<div class="type">实现: ${d.implementation}</div>` : ''}
+        ${d.targets ? `<div class="type">目标: ${d.targets.join(', ')}</div>` : ''}
+      `;
+      tooltip.classList.add('show');
+      tooltip.style.left = (event.pageX + 15) + 'px';
+      tooltip.style.top = (event.pageY - 10) + 'px';
+    })
+    .on("mousemove", (event) => {
+      tooltip.style.left = (event.pageX + 15) + 'px';
+      tooltip.style.top = (event.pageY - 10) + 'px';
+    })
+    .on("mouseout", () => {
+      tooltip.classList.remove('show');
+    });
+    
+    // Link hover
+    link.on("mouseover", (event, d) => {
+      tooltip.innerHTML = `
+        <h3>${d.type}</h3>
+        <p>${d.description}</p>
+        <div class="type">${d.from} → ${d.to}</div>
+      `;
+      tooltip.classList.add('show');
+      tooltip.style.left = (event.pageX + 15) + 'px';
+      tooltip.style.top = (event.pageY - 10) + 'px';
+    })
+    .on("mousemove", (event) => {
+      tooltip.style.left = (event.pageX + 15) + 'px';
+      tooltip.style.top = (event.pageY - 10) + 'px';
+    })
+    .on("mouseout", () => {
+      tooltip.classList.remove('show');
+    });
+    
+    // Update positions on tick
+    simulation.on("tick", () => {
+      link
+        .attr("x1", d => d.source.x)
+        .attr("y1", d => d.source.y)
+        .attr("x2", d => d.target.x)
+        .attr("y2", d => d.target.y);
+      
+      node
+        .attr("transform", d => `translate(${d.x},${d.y})`);
+      
+      // Update link labels
+      linkLabel
+        .attr("x", d => (d.source.x + d.target.x) / 2)
+        .attr("y", d => (d.source.y + d.target.y) / 2);
+      
+      // Update link label backgrounds
+      linkLabelBg.each(function(d, i) {
+        const textNode = linkLabel.nodes()[i];
+        const bbox = textNode.getBBox();
+        d3.select(this)
+          .attr("x", bbox.x - 4)
+          .attr("y", bbox.y - 2)
+          .attr("width", bbox.width + 8)
+          .attr("height", bbox.height + 4);
+      })
+      .attr("x", d => (d.source.x + d.target.x) / 2 - 20)
+      .attr("y", d => (d.source.y + d.target.y) / 2 - 8);
+    });
+    
+    // Drag functions
+    function dragstarted(event, d) {
+      if (!event.active) simulation.alphaTarget(0.3).restart();
+      d.fx = d.x;
+      d.fy = d.y;
+    }
+    
+    function dragged(event, d) {
+      d.fx = event.x;
+      d.fy = event.y;
+    }
+    
+    function dragended(event, d) {
+      if (!event.active) simulation.alphaTarget(0);
+      d.fx = null;
+      d.fy = null;
+    }
+    
+    // Control functions
+    function resetZoom() {
+      svg.transition().duration(750).call(
+        zoom.transform,
+        d3.zoomIdentity
+      );
+    }
+    
+    let animationRunning = true;
+    function toggleAnimation() {
+      animationRunning = !animationRunning;
+      document.getElementById('animBtn').textContent = animationRunning ? '暂停动画' : '继续动画';
+      document.getElementById('animBtn').classList.toggle('active', !animationRunning);
+      
+      if (animationRunning) {
+        simulation.restart();
+      } else {
+        simulation.stop();
+      }
+    }
+    
+    // Add markers for arrows
+    const defs = svg.append("defs");
+    Object.entries(edgeColorMap).forEach(([type, color]) => {
+      defs.append("marker")
+        .attr("id", `arrow-${type}`)
+        .attr("viewBox", "0 -5 10 10")
+        .attr("refX", 30)
+        .attr("refY", 0)
+        .attr("markerWidth", 6)
+        .attr("markerHeight", 6)
+        .attr("orient", "auto")
+        .append("path")
+        .attr("d", "M0,-5L10,0L0,5")
+        .attr("fill", color);
+    });
+    
+    // Handle window resize
+    window.addEventListener('resize', () => {
+      const newWidth = container.clientWidth || 1200;
+      const newHeight = container.clientHeight || 600;
+      svg.attr("viewBox", [0, 0, newWidth, newHeight]);
+      simulation.force("center", d3.forceCenter(newWidth / 2, newHeight / 2));
+      simulation.alpha(0.3).restart();
+    });
+  </script>
+</body>
+</html>
