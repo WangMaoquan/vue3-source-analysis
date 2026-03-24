@@ -1,0 +1,798 @@
+{
+  "metadata": {
+    "name": "Vue3 Runtime-Core Knowledge Graph",
+    "version": "1.0.0",
+    "description": "Vue3 runtime-core 模块知识图谱，包含组件实例、渲染器、虚拟节点、调度器",
+    "created": "2026-03-24"
+  },
+  "entities": [
+    {
+      "id": "file-component",
+      "type": "File",
+      "name": "component.ts",
+      "path": "packages/runtime-core/src/component.ts",
+      "lines": 1297,
+      "description": "Vue3 runtime-core 核心文件，负责组件实例创建、setup 处理、组件上下文构建"
+    },
+    {
+      "id": "file-renderer",
+      "type": "File",
+      "name": "renderer.ts",
+      "path": "packages/runtime-core/src/renderer.ts",
+      "lines": 2593,
+      "description": "渲染器核心文件，负责 VNode 渲染、组件生命周期、Diff 算法"
+    },
+    {
+      "id": "file-vnode",
+      "type": "File",
+      "name": "vnode.ts",
+      "path": "packages/runtime-core/src/vnode.ts",
+      "lines": 913,
+      "description": "虚拟节点定义文件，包含 VNode 数据结构和创建函数"
+    },
+    {
+      "id": "file-scheduler",
+      "type": "File",
+      "name": "scheduler.ts",
+      "path": "packages/runtime-core/src/scheduler.ts",
+      "description": "调度器核心文件，负责任务队列管理和异步执行"
+    },
+    {
+      "id": "ds-ComponentInternalInstance",
+      "type": "DataStructure",
+      "name": "ComponentInternalInstance",
+      "description": "组件内部实例的核心数据结构，包含60+个属性：uid、type、parent、root、vnode、effect、update、render、props、attrs、slots、setupState等"
+    },
+    {
+      "id": "ds-VNode",
+      "type": "DataStructure",
+      "name": "VNode",
+      "description": "虚拟节点，描述真实DOM节点的JavaScript对象，包含type、props、children、el、shapeFlag、patchFlag等字段"
+    },
+    {
+      "id": "ds-SetupContext",
+      "type": "DataStructure",
+      "name": "SetupContext",
+      "description": "setup()函数的上下文，包含attrs、slots、emit、expose"
+    },
+    {
+      "id": "ds-LifecycleHook",
+      "type": "DataStructure",
+      "name": "LifecycleHook",
+      "description": "生命周期钩子类型，是一个数组（存储多个同名钩子）或null"
+    },
+    {
+      "id": "ds-InternalRenderFunction",
+      "type": "DataStructure",
+      "name": "InternalRenderFunction",
+      "description": "内部渲染函数类型，用于执行组件渲染"
+    },
+    {
+      "id": "ds-FunctionalComponent",
+      "type": "DataStructure",
+      "name": "FunctionalComponent",
+      "description": "函数式组件类型定义"
+    },
+    {
+      "id": "ds-SchedulerJob",
+      "type": "DataStructure",
+      "name": "SchedulerJob",
+      "description": "调度任务接口，包含id、flags、i(组件实例)等属性"
+    },
+    {
+      "id": "ds-ShapeFlags",
+      "type": "DataStructure",
+      "name": "ShapeFlags",
+      "description": "VNode形状标记，使用位运算组合：ELEMENT(1)、COMPONENT(6)、TEXT_CHILDREN(8)、ARRAY_CHILDREN(16)等"
+    },
+    {
+      "id": "ds-PatchFlags",
+      "type": "DataStructure",
+      "name": "PatchFlags",
+      "description": "补丁标记，编译器生成的优化提示：TEXT(1)、CLASS(2)、STYLE(4)、PROPS(8)、BAIL(-2)等"
+    },
+    {
+      "id": "ds-Renderer",
+      "type": "DataStructure",
+      "name": "Renderer",
+      "description": "渲染器接口，包含render和createApp方法"
+    },
+    {
+      "id": "ds-RendererOptions",
+      "type": "DataStructure",
+      "name": "RendererOptions",
+      "description": "渲染器选项，定义平台特定的操作：patchProp、insert、remove、createElement等"
+    },
+    {
+      "id": "fn-createComponentInstance",
+      "type": "Function",
+      "name": "createComponentInstance",
+      "file": "file-component",
+      "description": "创建组件内部实例，初始化所有必要属性"
+    },
+    {
+      "id": "fn-setupComponent",
+      "type": "Function",
+      "file": "file-component",
+      "name": "setupComponent",
+      "description": "初始化组件的props、slots，并调用setup()"
+    },
+    {
+      "id": "fn-setupStatefulComponent",
+      "type": "Function",
+      "file": "file-component",
+      "name": "setupStatefulComponent",
+      "description": "处理有状态组件的setup()函数调用"
+    },
+    {
+      "id": "fn-handleSetupResult",
+      "type": "Function",
+      "file": "file-component",
+      "name": "handleSetupResult",
+      "description": "处理setup()函数的返回值"
+    },
+    {
+      "id": "fn-finishComponentSetup",
+      "type": "Function",
+      "file": "file-component",
+      "name": "finishComponentSetup",
+      "description": "完成组件设置，包括模板编译和应用选项"
+    },
+    {
+      "id": "fn-createSetupContext",
+      "type": "Function",
+      "file": "file-component",
+      "name": "createSetupContext",
+      "description": "创建setup()函数的第二个参数（上下文）"
+    },
+    {
+      "id": "fn-getComponentPublicInstance",
+      "type": "Function",
+      "file": "file-component",
+      "name": "getComponentPublicInstance",
+      "description": "获取组件的公开实例（用户通过this访问的对象）"
+    },
+    {
+      "id": "fn-createRenderer",
+      "type": "Function",
+      "file": "file-renderer",
+      "name": "createRenderer",
+      "description": "创建渲染器的工厂函数"
+    },
+    {
+      "id": "fn-patch",
+      "type": "Function",
+      "file": "file-renderer",
+      "name": "patch",
+      "description": "VNode对比算法，是整个渲染流程的核心"
+    },
+    {
+      "id": "fn-processElement",
+      "type": "Function",
+      "file": "file-renderer",
+      "name": "processElement",
+      "description": "处理元素节点，包括挂载和更新"
+    },
+    {
+      "id": "fn-processComponent",
+      "type": "Function",
+      "file": "file-renderer",
+      "name": "processComponent",
+      "description": "处理组件节点"
+    },
+    {
+      "id": "fn-mountComponent",
+      "type": "Function",
+      "file": "file-renderer",
+      "name": "mountComponent",
+      "description": "组件挂载流程"
+    },
+    {
+      "id": "fn-updateComponent",
+      "type": "Function",
+      "file": "file-renderer",
+      "name": "updateComponent",
+      "description": "组件更新流程"
+    },
+    {
+      "id": "fn-setupRenderEffect",
+      "type": "Function",
+      "file": "file-renderer",
+      "name": "setupRenderEffect",
+      "description": "创建响应式渲染effect，是Vue3响应式渲染的核心"
+    },
+    {
+      "id": "fn-patchChildren",
+      "type": "Function",
+      "file": "file-renderer",
+      "name": "patchChildren",
+      "description": "子节点对比入口"
+    },
+    {
+      "id": "fn-patchKeyedChildren",
+      "type": "Function",
+      "file": "file-renderer",
+      "name": "patchKeyedChildren",
+      "description": "有key子节点对比，核心Diff算法，使用四步算法+LIS优化"
+    },
+    {
+      "id": "fn-unmount",
+      "type": "Function",
+      "file": "file-renderer",
+      "name": "unmount",
+      "description": "卸载VNode"
+    },
+    {
+      "id": "fn-unmountComponent",
+      "type": "Function",
+      "file": "file-renderer",
+      "name": "unmountComponent",
+      "description": "卸载组件"
+    },
+    {
+      "id": "fn-createVNode",
+      "type": "Function",
+      "file": "file-vnode",
+      "name": "createVNode",
+      "description": "创建虚拟节点的入口函数"
+    },
+    {
+      "id": "fn-createBaseVNode",
+      "type": "Function",
+      "file": "file-vnode",
+      "name": "createBaseVNode",
+      "description": "基础虚拟节点创建函数"
+    },
+    {
+      "id": "fn-createElementBlock",
+      "type": "Function",
+      "file": "file-vnode",
+      "name": "createElementBlock",
+      "description": "创建块级元素节点"
+    },
+    {
+      "id": "fn-createBlock",
+      "type": "Function",
+      "file": "file-vnode",
+      "name": "createBlock",
+      "description": "创建块级节点"
+    },
+    {
+      "id": "fn-cloneVNode",
+      "type": "Function",
+      "file": "file-vnode",
+      "name": "cloneVNode",
+      "description": "克隆虚拟节点"
+    },
+    {
+      "id": "fn-normalizeVNode",
+      "type": "Function",
+      "file": "file-vnode",
+      "name": "normalizeVNode",
+      "description": "规范化单个子节点"
+    },
+    {
+      "id": "fn-normalizeChildren",
+      "type": "Function",
+      "file": "file-vnode",
+      "name": "normalizeChildren",
+      "description": "规范化子节点"
+    },
+    {
+      "id": "fn-mergeProps",
+      "type": "Function",
+      "file": "file-vnode",
+      "name": "mergeProps",
+      "description": "合并属性"
+    },
+    {
+      "id": "fn-isSameVNodeType",
+      "type": "Function",
+      "file": "file-vnode",
+      "name": "isSameVNodeType",
+      "description": "比较节点类型是否相同"
+    },
+    {
+      "id": "fn-nextTick",
+      "type": "Function",
+      "file": "file-scheduler",
+      "name": "nextTick",
+      "description": "返回Promise，在调度器完成flush后resolve"
+    },
+    {
+      "id": "fn-queueJob",
+      "type": "Function",
+      "file": "file-scheduler",
+      "name": "queueJob",
+      "description": "添加任务到队列，自动排序和去重"
+    },
+    {
+      "id": "fn-queueFlush",
+      "type": "Function",
+      "file": "file-scheduler",
+      "name": "queueFlush",
+      "description": "触发flush，使用Promise.then调度微任务"
+    },
+    {
+      "id": "fn-flushJobs",
+      "type": "Function",
+      "file": "file-scheduler",
+      "name": "flushJobs",
+      "description": "执行队列任务的主函数"
+    },
+    {
+      "id": "fn-findInsertionIndex",
+      "type": "Function",
+      "file": "file-scheduler",
+      "name": "findInsertionIndex",
+      "description": "使用二分查找在队列中找到正确的插入位置"
+    },
+    {
+      "id": "concept-vnode",
+      "type": "Concept",
+      "name": "虚拟DOM",
+      "description": "Virtual DOM，用JavaScript对象描述真实DOM的结构"
+    },
+    {
+      "id": "concept-diff",
+      "type": "Concept",
+      "name": "Diff算法",
+      "description": "高效的子节点对比算法，Vue3使用四步算法+LIS最长递增子序列优化"
+    },
+    {
+      "id": "concept-patch",
+      "type": "Concept",
+      "name": "VNode对比",
+      "description": "将新旧VNode进行对比并更新到真实DOM的过程"
+    },
+    {
+      "id": "concept-reactivity",
+      "type": "Concept",
+      "name": "响应式系统",
+      "description": "Vue3使用Proxy实现的响应式数据系统"
+    },
+    {
+      "id": "concept-lifecycle",
+      "type": "Concept",
+      "name": "生命周期钩子",
+      "description": "组件创建、更新、销毁过程中的钩子函数：beforeCreate、created、beforeMount、mounted等"
+    },
+    {
+      "id": "concept-setup",
+      "type": "Concept",
+      "name": "Composition API",
+      "description": "Vue3的新API，允许使用函数方式组织组件逻辑"
+    },
+    {
+      "id": "concept-suspense",
+      "type": "Concept",
+      "name": "Suspense",
+      "description": "Vue3的异步组件占位机制"
+    },
+    {
+      "id": "concept-keepalive",
+      "type": "Concept",
+      "name": "KeepAlive",
+      "description": "Vue3的组件缓存机制"
+    },
+    {
+      "id": "concept-teleport",
+      "type": "Concept",
+      "name": "Teleport",
+      "description": "Vue3的传送门组件，可以将子节点渲染到DOM任意位置"
+    },
+    {
+      "id": "concept-block",
+      "type": "Concept",
+      "name": "块级优化",
+      "description": "Vue3编译器和运行时配合的优化机制，减少不必要的DOM diff"
+    },
+    {
+      "id": "concept-microtask",
+      "type": "Concept",
+      "name": "微任务调度",
+      "description": "使用Promise.then实现任务调度，在当前事件循环结束后执行"
+    },
+    {
+      "id": "concept-batch",
+      "type": "Concept",
+      "name": "批处理",
+      "description": "将多次数据变更合并为一次DOM更新"
+    },
+    {
+      "id": "concept-proxy",
+      "type": "Concept",
+      "name": "代理机制",
+      "description": "组件使用多层代理机制访问属性：this -> proxy -> ctx"
+    },
+    {
+      "id": "concept-provide-inject",
+      "type": "Concept",
+      "name": "Provide/Inject",
+      "description": "Vue3通过原型链实现的跨层级数据共享机制"
+    },
+    {
+      "id": "module-runtime-core",
+      "type": "Module",
+      "name": "runtime-core",
+      "description": "Vue3运行时核心模块"
+    },
+    {
+      "id": "module-reactivity",
+      "type": "Module",
+      "name": "@vue/reactivity",
+      "description": "Vue3响应式系统模块"
+    },
+    {
+      "id": "module-shared",
+      "type": "Module",
+      "name": "@vue/shared",
+      "description": "Vue3共享工具模块"
+    },
+    {
+      "id": "module-suspense",
+      "type": "Module",
+      "name": "Suspense组件",
+      "description": "异步组件占位组件"
+    },
+    {
+      "id": "module-keepalive",
+      "type": "Module",
+      "name": "KeepAlive组件",
+      "description": "组件缓存组件"
+    },
+    {
+      "id": "module-teleport",
+      "type": "Module",
+      "name": "Teleport组件",
+      "description": "传送门组件"
+    }
+  ],
+  "relations": [
+    {
+      "from": "file-component",
+      "type": "defines",
+      "to": "ds-ComponentInternalInstance"
+    },
+    {
+      "from": "file-component",
+      "type": "defines",
+      "to": "ds-SetupContext"
+    },
+    {
+      "from": "file-component",
+      "type": "defines",
+      "to": "ds-LifecycleHook"
+    },
+    {
+      "from": "file-component",
+      "type": "defines",
+      "to": "ds-InternalRenderFunction"
+    },
+    {
+      "from": "file-component",
+      "type": "defines",
+      "to": "ds-FunctionalComponent"
+    },
+    {
+      "from": "file-component",
+      "type": "imports",
+      "to": "file-vnode"
+    },
+    {
+      "from": "file-component",
+      "type": "imports",
+      "to": "file-scheduler"
+    },
+    {
+      "from": "file-renderer",
+      "type": "defines",
+      "to": "ds-Renderer"
+    },
+    {
+      "from": "file-renderer",
+      "type": "defines",
+      "to": "ds-RendererOptions"
+    },
+    {
+      "from": "file-renderer",
+      "type": "imports",
+      "to": "file-vnode"
+    },
+    {
+      "from": "file-renderer",
+      "type": "imports",
+      "to": "file-component"
+    },
+    {
+      "from": "file-renderer",
+      "type": "imports",
+      "to": "file-scheduler"
+    },
+    {
+      "from": "file-vnode",
+      "type": "defines",
+      "to": "ds-VNode"
+    },
+    {
+      "from": "file-vnode",
+      "type": "defines",
+      "to": "ds-ShapeFlags"
+    },
+    {
+      "from": "file-vnode",
+      "type": "defines",
+      "to": "ds-PatchFlags"
+    },
+    {
+      "from": "file-scheduler",
+      "type": "defines",
+      "to": "ds-SchedulerJob"
+    },
+    {
+      "from": "fn-createComponentInstance",
+      "type": "calls",
+      "to": "fn-createSetupContext"
+    },
+    {
+      "from": "fn-setupComponent",
+      "type": "calls",
+      "to": "fn-setupStatefulComponent"
+    },
+    {
+      "from": "fn-setupComponent",
+      "type": "calls",
+      "to": "fn-handleSetupResult"
+    },
+    {
+      "from": "fn-setupStatefulComponent",
+      "type": "calls",
+      "to": "fn-handleSetupResult"
+    },
+    {
+      "from": "fn-setupStatefulComponent",
+      "type": "calls",
+      "to": "fn-finishComponentSetup"
+    },
+    {
+      "from": "fn-finishComponentSetup",
+      "type": "calls",
+      "to": "fn-createSetupContext"
+    },
+    {
+      "from": "fn-createRenderer",
+      "type": "calls",
+      "to": "fn-patch"
+    },
+    {
+      "from": "fn-patch",
+      "type": "calls",
+      "to": "fn-processElement"
+    },
+    {
+      "from": "fn-patch",
+      "type": "calls",
+      "to": "fn-processComponent"
+    },
+    {
+      "from": "fn-processComponent",
+      "type": "calls",
+      "to": "fn-mountComponent"
+    },
+    {
+      "from": "fn-processComponent",
+      "type": "calls",
+      "to": "fn-updateComponent"
+    },
+    {
+      "from": "fn-mountComponent",
+      "type": "calls",
+      "to": "fn-createComponentInstance"
+    },
+    {
+      "from": "fn-mountComponent",
+      "type": "calls",
+      "to": "fn-setupComponent"
+    },
+    {
+      "from": "fn-mountComponent",
+      "type": "calls",
+      "to": "fn-setupRenderEffect"
+    },
+    {
+      "from": "fn-updateComponent",
+      "type": "calls",
+      "to": "fn-setupRenderEffect"
+    },
+    {
+      "from": "fn-setupRenderEffect",
+      "type": "calls",
+      "to": "fn-patch"
+    },
+    {
+      "from": "fn-processElement",
+      "type": "calls",
+      "to": "fn-patchChildren"
+    },
+    {
+      "from": "fn-patchChildren",
+      "type": "calls",
+      "to": "fn-patchKeyedChildren"
+    },
+    {
+      "from": "fn-unmount",
+      "type": "calls",
+      "to": "fn-unmountComponent"
+    },
+    {
+      "from": "fn-createVNode",
+      "type": "calls",
+      "to": "fn-createBaseVNode"
+    },
+    {
+      "from": "fn-createBaseVNode",
+      "type": "calls",
+      "to": "fn-normalizeChildren"
+    },
+    {
+      "from": "fn-normalizeChildren",
+      "type": "calls",
+      "to": "fn-normalizeVNode"
+    },
+    {
+      "from": "fn-createElementBlock",
+      "type": "calls",
+      "to": "fn-createBaseVNode"
+    },
+    {
+      "from": "fn-createBlock",
+      "type": "calls",
+      "to": "fn-createVNode"
+    },
+    {
+      "from": "fn-queueJob",
+      "type": "calls",
+      "to": "fn-queueFlush"
+    },
+    {
+      "from": "fn-queueJob",
+      "type": "calls",
+      "to": "fn-findInsertionIndex"
+    },
+    {
+      "from": "fn-queueFlush",
+      "type": "calls",
+      "to": "fn-flushJobs"
+    },
+    {
+      "from": "ds-ComponentInternalInstance",
+      "type": "relates_to",
+      "to": "ds-VNode"
+    },
+    {
+      "from": "ds-ComponentInternalInstance",
+      "type": "relates_to",
+      "to": "ds-SetupContext"
+    },
+    {
+      "from": "ds-VNode",
+      "type": "relates_to",
+      "to": "ds-ShapeFlags"
+    },
+    {
+      "from": "ds-VNode",
+      "type": "relates_to",
+      "to": "ds-PatchFlags"
+    },
+    {
+      "from": "concept-vnode",
+      "type": "relates_to",
+      "to": "ds-VNode"
+    },
+    {
+      "from": "concept-diff",
+      "type": "relates_to",
+      "to": "fn-patchKeyedChildren"
+    },
+    {
+      "from": "concept-patch",
+      "type": "relates_to",
+      "to": "fn-patch"
+    },
+    {
+      "from": "concept-reactivity",
+      "type": "relates_to",
+      "to": "module-reactivity"
+    },
+    {
+      "from": "concept-lifecycle",
+      "type": "relates_to",
+      "to": "ds-LifecycleHook"
+    },
+    {
+      "from": "concept-setup",
+      "type": "relates_to",
+      "to": "fn-setupComponent"
+    },
+    {
+      "from": "concept-suspense",
+      "type": "relates_to",
+      "to": "module-suspense"
+    },
+    {
+      "from": "concept-keepalive",
+      "type": "relates_to",
+      "to": "module-keepalive"
+    },
+    {
+      "from": "concept-teleport",
+      "type": "relates_to",
+      "to": "module-teleport"
+    },
+    {
+      "from": "concept-block",
+      "type": "relates_to",
+      "to": "ds-PatchFlags"
+    },
+    {
+      "from": "concept-microtask",
+      "type": "relates_to",
+      "to": "fn-nextTick"
+    },
+    {
+      "from": "concept-batch",
+      "type": "relates_to",
+      "to": "fn-queueJob"
+    },
+    {
+      "from": "concept-proxy",
+      "type": "relates_to",
+      "to": "ds-ComponentInternalInstance"
+    },
+    {
+      "from": "concept-provide-inject",
+      "type": "relates_to",
+      "to": "ds-ComponentInternalInstance"
+    },
+    {
+      "from": "module-runtime-core",
+      "type": "imports",
+      "to": "module-reactivity"
+    },
+    {
+      "from": "module-runtime-core",
+      "type": "imports",
+      "to": "module-shared"
+    },
+    {
+      "from": "file-component",
+      "type": "implements",
+      "to": "concept-lifecycle"
+    },
+    {
+      "from": "file-component",
+      "type": "implements",
+      "to": "concept-setup"
+    },
+    {
+      "from": "file-renderer",
+      "type": "implements",
+      "to": "concept-patch"
+    },
+    {
+      "from": "file-vnode",
+      "type": "implements",
+      "to": "concept-vnode"
+    },
+    {
+      "from": "file-scheduler",
+      "type": "implements",
+      "to": "concept-microtask"
+    },
+    {
+      "from": "file-scheduler",
+      "type": "implements",
+      "to": "concept-batch"
+    }
+  ]
+}
